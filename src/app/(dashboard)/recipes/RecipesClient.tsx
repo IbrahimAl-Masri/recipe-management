@@ -3,7 +3,9 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Plus } from 'lucide-react';
+import { LogOut, Plus } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { createClient } from '@/lib/supabase/client';
 import { RecipeCard, type Recipe } from '@/components/RecipeCard';
 import { SearchBar, type SearchFilters } from '@/components/SearchBar';
 import type { RecipeStatus } from '@/components/StatusBadge';
@@ -33,6 +35,20 @@ export function RecipesClient({ initialRecipes }: RecipesClientProps) {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<SearchFilters>({});
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      router.push('/login');
+    } catch {
+      toast.error('Failed to sign out');
+      setSigningOut(false);
+    }
+  }
 
   function handleSearch(q: string, f: SearchFilters) {
     setQuery(q);
@@ -85,13 +101,25 @@ export function RecipesClient({ initialRecipes }: RecipesClientProps) {
                 : 'Your recipe collection is empty'}
             </p>
           </div>
-          <Link
-            href="/recipes/new"
-            className="flex shrink-0 items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900"
-          >
-            <Plus className="h-4 w-4" />
-            New Recipe
-          </Link>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={handleSignOut}
+              disabled={signingOut}
+              aria-label="Sign out"
+              className="flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm font-medium text-zinc-600 shadow-sm transition-colors hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">{signingOut ? 'Signing out…' : 'Sign out'}</span>
+            </button>
+            <Link
+              href="/recipes/new"
+              className="flex items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900"
+            >
+              <Plus className="h-4 w-4" />
+              New Recipe
+            </Link>
+          </div>
         </div>
 
         {/* Status summary pills */}

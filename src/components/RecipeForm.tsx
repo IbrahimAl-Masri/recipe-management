@@ -188,12 +188,12 @@ export function RecipeForm({
           title: fields.title.trim(),
           description: fields.description.trim() || null,
           cuisine_type: fields.cuisineType,
-          prep_time: parseInt(fields.prepTime) || 0,
-          cook_time: parseInt(fields.cookTime) || 0,
+          prep_time_minutes: parseInt(fields.prepTime) || 0,
+          cook_time_minutes: parseInt(fields.cookTime) || 0,
           servings: parseInt(fields.servings) || null,
           difficulty: fields.difficulty,
           status: fields.status,
-          cover_image: fields.coverImage.trim() || null,
+          cover_image_url: fields.coverImage.trim() || null,
           user_id: user.id,
         })
         .select('id')
@@ -205,12 +205,11 @@ export function RecipeForm({
       const validIngredients = ingredients.filter((i) => i.name.trim());
       if (validIngredients.length > 0) {
         const { error: ingError } = await supabase.from('ingredients').insert(
-          validIngredients.map((ing, idx) => ({
+          validIngredients.map((ing) => ({
             recipe_id: recipe.id,
             name: ing.name.trim(),
             quantity: ing.quantity.trim() || null,
             unit: ing.unit.trim() || null,
-            order_index: idx,
           })),
         );
         if (ingError) throw ingError;

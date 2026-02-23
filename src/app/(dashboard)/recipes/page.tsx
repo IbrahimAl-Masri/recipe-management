@@ -22,7 +22,7 @@ export default async function RecipesPage() {
 
   const { data: rows, error } = await supabase
     .from('recipes')
-    .select('id, title, cuisine_type, prep_time, cook_time, difficulty, status, cover_image')
+    .select('id, title, cuisine_type, prep_time_minutes, cook_time_minutes, difficulty, status, cover_image_url')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
@@ -34,11 +34,11 @@ export default async function RecipesPage() {
     id: row.id as string,
     title: row.title as string,
     cuisineType: row.cuisine_type as string,
-    prepTime: row.prep_time as number,
-    cookTime: row.cook_time as number,
+    prepTime: row.prep_time_minutes as number,
+    cookTime: row.cook_time_minutes as number,
     difficulty: row.difficulty as Difficulty,
     status: row.status as RecipeStatus,
-    coverImage: (row.cover_image as string | null) ?? undefined,
+    coverImage: (row.cover_image_url as string | null) ?? undefined,
   }));
 
   return <RecipesClient initialRecipes={recipes} />;

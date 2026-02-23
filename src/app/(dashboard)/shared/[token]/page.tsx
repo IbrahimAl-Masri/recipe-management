@@ -83,7 +83,7 @@ export default async function SharedRecipePage({ params }: PageProps) {
   const { data: recipe } = await supabase
     .from('recipes')
     .select(
-      'id, title, description, cuisine_type, prep_time, cook_time, servings, difficulty, status, cover_image',
+      'id, title, description, cuisine_type, prep_time_minutes, cook_time_minutes, servings, difficulty, status, cover_image_url',
     )
     .eq('id', share.recipe_id)
     .maybeSingle();
@@ -95,7 +95,6 @@ export default async function SharedRecipePage({ params }: PageProps) {
     .from('ingredients')
     .select('id, name, quantity, unit')
     .eq('recipe_id', share.recipe_id)
-    .order('order_index', { ascending: true });
 
   // 4. Fetch instructions ordered by step number
   const { data: instructions } = await supabase
@@ -105,8 +104,8 @@ export default async function SharedRecipePage({ params }: PageProps) {
     .order('step_number', { ascending: true });
 
   // Derived display values
-  const prepTime = recipe.prep_time as number;
-  const cookTime = recipe.cook_time as number;
+  const prepTime = recipe.prep_time_minutes as number;
+  const cookTime = recipe.cook_time_minutes as number;
   const totalTime = prepTime + cookTime;
   const diff = difficultyConfig[recipe.difficulty as Difficulty];
   const hasIngredients = (ingredients ?? []).length > 0;
@@ -131,11 +130,11 @@ export default async function SharedRecipePage({ params }: PageProps) {
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
 
         {/* ── Cover image ── */}
-        {recipe.cover_image && (
+        {recipe.cover_image_url && (
           <div className="mb-8 overflow-hidden rounded-2xl border border-zinc-100">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={recipe.cover_image as string}
+              src={recipe.cover_image_url as string}
               alt={recipe.title as string}
               className="h-64 w-full object-cover sm:h-80"
             />
